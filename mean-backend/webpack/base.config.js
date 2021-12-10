@@ -9,6 +9,7 @@ const SRC_ROOT = path.join(__dirname, '../src')
 module.exports = {
   context: SRC_ROOT,
   entry: path.resolve('src', 'index.ts'),
+  target: 'node',
   externals: [nodeExternals()],
   output: {
     filename: 'server.js',
