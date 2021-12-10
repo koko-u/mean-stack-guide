@@ -1,0 +1,28 @@
+<mat-card>
+  <form (submit)="onAddPost()" [formGroup]="postForm" #formDirective="ngForm">
+    <mat-form-field>
+      <mat-label>Title</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="title">
+      <mat-error *ngIf="titleRequiredError">Please enter a post title</mat-error>
+      <mat-error *ngIf="titleMinLengthError">title length should be at least 3</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Post Content</mat-label>
+      <textarea
+        matInput cols="30" rows="6"
+        formControlName="content">
+      </textarea>
+      <mat-error *ngIf="postForm.controls['content'].invalid">Please enter a post content</mat-error>
+    </mat-form-field>
+    <button
+      mat-raised-button
+      color="accent"
+      type="submit"
+    >
+      Save Post
+    </button>
+  </form>
+</mat-card>
