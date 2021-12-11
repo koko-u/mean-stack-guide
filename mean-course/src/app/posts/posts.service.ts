@@ -48,7 +48,7 @@ export class PostsService {
     this.http
       .post<{ post: PostResponse }>('/api/posts', { title, content })
       .pipe(
-        tap((res) => console.log({ serverResponse: res })),
+        tap((res) => console.log({ method: 'add', serverResponse: res })),
         map(({ post }) => {
           return [...this._postsUpdated$.value, toPost(post)]
         }),
@@ -66,9 +66,48 @@ export class PostsService {
     this.http
       .get<{ posts: PostResponse[] }>('/api/posts')
       .pipe(
-        tap((res) => console.log({ serverResponse: res })),
+        tap((res) => console.log({ method: 'getPosts', serverResponse: res })),
         map((res) => res.posts.map(toPost)),
         concatWith(NEVER) // ignore complete
+      )
+      .subscribe(this._postsUpdated$)
+  }
+
+  /**
+   * get post by id
+   *
+   * @param id
+   */
+  getPostById$(id: string): Observable<Post> {
+    return this.http.get<{ post: PostResponse }>(`/api/posts/${id}`).pipe(
+      tap((res) => console.log({ method: 'getPostById', serverResponse: res })),
+      map(({ post }) => {
+        return toPost(post)
+      })
+    )
+  }
+
+  /**
+   * update the post
+   *
+   * @param id
+   * @param title
+   * @param content
+   */
+  update(id: string, title: string, content: string) {
+    this.http
+      .patch<{ post: PostResponse }>(`/api/posts/${id}`, {
+        title,
+        content,
+      })
+      .pipe(
+        tap((res) => console.log({ method: 'update', serverResponse: res })),
+        map(({ post: updated }) => {
+          return this._postsUpdated$.value.map((post) =>
+            post.id === updated._id ? toPost(updated) : post
+          )
+        }),
+        concatWith(NEVER)
       )
       .subscribe(this._postsUpdated$)
   }
@@ -77,7 +116,9 @@ export class PostsService {
     this.http
       .delete<{ post: PostResponse }>(`/api/posts/${id}`)
       .pipe(
-        tap((res) => console.log({ serverResponse: res })),
+        tap((res) =>
+          console.log({ method: 'deletePost', serverResponse: res })
+        ),
         map((res) => {
           // remove deleted post's id element
           return this._postsUpdated$.value.filter(

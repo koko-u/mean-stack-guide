@@ -1,5 +1,5 @@
 <mat-card>
-  <form (submit)="onAddPost()" [formGroup]="postForm" #formDirective="ngForm">
+  <form (submit)="onSavePost()" [formGroup]="postForm">
     <mat-form-field>
       <mat-label>Title</mat-label>
       <input
@@ -22,7 +22,7 @@
       color="accent"
       type="submit"
     >
-      Save Post
+      {{ isEditing ? 'Update Post' : 'Save Post' }}
     </button>
   </form>
 </mat-card>

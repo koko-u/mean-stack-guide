@@ -13,6 +13,7 @@ import { PostItemComponent } from './post-list/post-item/post-item.component'
 import { PostsComponent } from './posts.component'
 import { PostsService } from './posts.service'
 import { HttpClientModule } from '@angular/common/http'
+import { RouterModule } from '@angular/router'
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { HttpClientModule } from '@angular/common/http'
     MatCardModule,
     MatButtonModule,
     MatExpansionModule,
+    RouterModule,
   ],
   exports: [PostsComponent],
   providers: [PostsService],

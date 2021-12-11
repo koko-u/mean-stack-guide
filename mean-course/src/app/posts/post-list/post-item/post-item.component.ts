@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { Post } from '../../../shared/models/post.type'
 import { PostsService } from '../../posts.service'
+import { ActivatedRoute, Router } from '@angular/router'
 
 @Component({
   selector: 'mc-post-item[post]',
@@ -33,13 +34,25 @@ export class PostItemComponent {
    * constructor
    *
    * @param postsService post manipulation service
+   * @param route
+   * @param router
    */
-  constructor(private postsService: PostsService) {}
+  constructor(
+    private postsService: PostsService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   /**
    * delete this post
    */
   delete() {
     this.postsService.deletePost(this.post.id)
+  }
+
+  async edit() {
+    await this.router.navigate(['edit', this.post.id], {
+      relativeTo: this.route,
+    })
   }
 }

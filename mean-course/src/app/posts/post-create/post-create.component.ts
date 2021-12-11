@@ -1,13 +1,28 @@
-import { Component, ViewChild } from '@angular/core'
+import { Component, OnInit, ViewChild } from '@angular/core'
 import { FormBuilder, NgForm, Validators } from '@angular/forms'
 import { PostsService } from '../posts.service'
+import { ActivatedRoute, Router } from '@angular/router'
+import { concatMap, EMPTY, Observable, tap } from 'rxjs'
+import { Post } from '../../shared/models/post.type'
 
 @Component({
   selector: 'mc-post-create',
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.scss'],
 })
-export class PostCreateComponent {
+export class PostCreateComponent implements OnInit {
+  /**
+   * post for edit when this component used for edit the post
+   * when used for new post, this field is undefined
+   *
+   * @private
+   */
+  private _postForEdit: Post | undefined
+
+  get isEditing(): boolean {
+    return this._postForEdit !== undefined
+  }
+
   /**
    * formGroup for post's entry form
    */
@@ -15,24 +30,6 @@ export class PostCreateComponent {
     title: ['', [Validators.required, Validators.minLength(3)]],
     content: ['', [Validators.required]],
   })
-
-  private _formDirective: NgForm | undefined
-
-  /**
-   * post's entry form directive
-   *
-   * @note which used for clear the form
-   */
-  get formDirective(): NgForm {
-    if (this._formDirective === undefined) {
-      throw new Error('no formDirective attribute form')
-    }
-    return this._formDirective
-  }
-  @ViewChild('formDirective')
-  set formDirective(value: NgForm) {
-    this._formDirective = value
-  }
 
   /**
    * post's title has required error or not
@@ -58,19 +55,57 @@ export class PostCreateComponent {
    * constructor
    * @param fb formGroup builder service
    * @param postsService post manipulation service
+   * @param route activatedRoute service
+   * @param router routes service
    */
-  constructor(private fb: FormBuilder, private postsService: PostsService) {}
+  constructor(
+    private fb: FormBuilder,
+    private postsService: PostsService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.route.paramMap
+      .pipe(
+        concatMap((paramMap) => {
+          const id = paramMap.get('id')
+          if (id === null) {
+            return EMPTY
+          } else {
+            return this.postsService.getPostById$(id)
+          }
+        }),
+        tap((v) => console.log({ component: 'PostCreate', value: v }))
+      )
+      .subscribe((post) => {
+        this._postForEdit = post
+        this.postForm.setValue({
+          title: post.title,
+          content: post.content,
+        })
+      })
+  }
 
   /**
-   * add new post
+   * add new post or edit the post
    */
-  onAddPost() {
+  async onSavePost() {
     if (this.postForm.invalid) return
 
-    this.postsService.add(
-      this.postForm.value.title,
-      this.postForm.value.content
-    )
-    this.formDirective.resetForm()
+    if (this.isEditing) {
+      this.postsService.update(
+        this._postForEdit?.id ?? '',
+        this.postForm.value.title,
+        this.postForm.value.content
+      )
+    } else {
+      this.postsService.add(
+        this.postForm.value.title,
+        this.postForm.value.content
+      )
+    }
+
+    await this.router.navigate([''], { relativeTo: this.route })
   }
 }
