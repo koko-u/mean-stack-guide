@@ -2,13 +2,23 @@ import { Component, OnInit, ViewChild } from '@angular/core'
 import { FormBuilder, NgForm, Validators } from '@angular/forms'
 import { PostsService } from '../posts.service'
 import { ActivatedRoute, Router } from '@angular/router'
-import { concatMap, EMPTY, Observable, tap } from 'rxjs'
+import {
+  concatMap,
+  EMPTY,
+  iif,
+  MonoTypeOperatorFunction,
+  Observable,
+  OperatorFunction,
+  tap,
+} from 'rxjs'
 import { Post } from '../../shared/models/post.type'
+import { LoadingDataService } from '../../shared/loading-data.service'
 
 @Component({
   selector: 'mc-post-create',
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.scss'],
+  providers: [LoadingDataService],
 })
 export class PostCreateComponent implements OnInit {
   /**
@@ -57,12 +67,14 @@ export class PostCreateComponent implements OnInit {
    * @param postsService post manipulation service
    * @param route activatedRoute service
    * @param router routes service
+   * @param loading isLoading Control service
    */
   constructor(
     private fb: FormBuilder,
     private postsService: PostsService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    public loading: LoadingDataService
   ) {}
 
   ngOnInit(): void {
@@ -73,7 +85,7 @@ export class PostCreateComponent implements OnInit {
           if (id === null) {
             return EMPTY
           } else {
-            return this.postsService.getPostById$(id)
+            return this.postsService.getPostById$(id).pipe(this.loading.setup())
           }
         }),
         tap((v) => console.log({ component: 'PostCreate', value: v }))
@@ -93,19 +105,23 @@ export class PostCreateComponent implements OnInit {
   async onSavePost() {
     if (this.postForm.invalid) return
 
-    if (this.isEditing) {
+    const savePost$ = iif(
+      () => this.isEditing,
       this.postsService.update(
         this._postForEdit?.id ?? '',
         this.postForm.value.title,
         this.postForm.value.content
-      )
-    } else {
+      ),
       this.postsService.add(
         this.postForm.value.title,
         this.postForm.value.content
       )
-    }
+    )
 
-    await this.router.navigate([''], { relativeTo: this.route })
+    savePost$.pipe(this.loading.setup()).subscribe({
+      complete: async () => {
+        await this.router.navigate([''], { relativeTo: this.route })
+      },
+    })
   }
 }

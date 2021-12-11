@@ -2,11 +2,13 @@ import { Component, Input, OnInit } from '@angular/core'
 import { Post } from '../../../shared/models/post.type'
 import { PostsService } from '../../posts.service'
 import { ActivatedRoute, Router } from '@angular/router'
+import { LoadingDataService } from '../../../shared/loading-data.service'
 
 @Component({
   selector: 'mc-post-item[post]',
   templateUrl: './post-item.component.html',
   styleUrls: ['./post-item.component.scss'],
+  providers: [LoadingDataService],
 })
 export class PostItemComponent {
   private _post: Post | undefined
@@ -36,18 +38,23 @@ export class PostItemComponent {
    * @param postsService post manipulation service
    * @param route
    * @param router
+   * @param loading
    */
   constructor(
     private postsService: PostsService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    public loading: LoadingDataService
   ) {}
 
   /**
    * delete this post
    */
   delete() {
-    this.postsService.deletePost(this.post.id)
+    this.postsService
+      .deletePost(this.post.id)
+      .pipe(this.loading.setup())
+      .subscribe()
   }
 
   async edit() {

@@ -1,28 +1,33 @@
-<mat-card>
-  <form (submit)="onSavePost()" [formGroup]="postForm">
-    <mat-form-field>
-      <mat-label>Title</mat-label>
-      <input
-        matInput
-        type="text"
-        formControlName="title">
-      <mat-error *ngIf="titleRequiredError">Please enter a post title</mat-error>
-      <mat-error *ngIf="titleMinLengthError">title length should be at least 3</mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Post Content</mat-label>
-      <textarea
-        matInput cols="30" rows="6"
-        formControlName="content">
+<ng-container *ngIf="loading.isLoading$ | async; else loaded">
+  <mat-spinner></mat-spinner>
+</ng-container>
+<ng-template #loaded>
+  <mat-card>
+    <form (submit)="onSavePost()" [formGroup]="postForm">
+      <mat-form-field>
+        <mat-label>Title</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="title">
+        <mat-error *ngIf="titleRequiredError">Please enter a post title</mat-error>
+        <mat-error *ngIf="titleMinLengthError">title length should be at least 3</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Post Content</mat-label>
+        <textarea
+          matInput cols="30" rows="6"
+          formControlName="content">
       </textarea>
-      <mat-error *ngIf="postForm.controls['content'].invalid">Please enter a post content</mat-error>
-    </mat-form-field>
-    <button
-      mat-raised-button
-      color="accent"
-      type="submit"
-    >
-      {{ isEditing ? 'Update Post' : 'Save Post' }}
-    </button>
-  </form>
-</mat-card>
+        <mat-error *ngIf="postForm.controls['content'].invalid">Please enter a post content</mat-error>
+      </mat-form-field>
+      <button
+        mat-raised-button
+        color="accent"
+        type="submit"
+      >
+        {{ isEditing ? 'Update Post' : 'Save Post' }}
+      </button>
+    </form>
+  </mat-card>
+</ng-template>
