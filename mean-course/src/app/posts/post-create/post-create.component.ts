@@ -8,15 +8,21 @@ import { PostsService } from '../posts.service'
   styleUrls: ['./post-create.component.scss'],
 })
 export class PostCreateComponent {
-  enteredTitle: string = ''
-  enteredContent: string = ''
-
+  /**
+   * formGroup for post's entry form
+   */
   postForm = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
     content: ['', [Validators.required]],
   })
 
   private _formDirective: NgForm | undefined
+
+  /**
+   * post's entry form directive
+   *
+   * @note which used for clear the form
+   */
   get formDirective(): NgForm {
     if (this._formDirective === undefined) {
       throw new Error('no formDirective attribute form')
@@ -28,12 +34,19 @@ export class PostCreateComponent {
     this._formDirective = value
   }
 
+  /**
+   * post's title has required error or not
+   */
   get titleRequiredError(): boolean {
     if (this.postForm.controls['title'].errors) {
       return !!this.postForm.controls['title'].errors['required']
     }
     return false
   }
+
+  /**
+   * post's title has minlength error or not
+   */
   get titleMinLengthError(): boolean {
     if (this.postForm.controls['title'].errors) {
       return !!this.postForm.controls['title'].errors['minlength']
@@ -41,8 +54,16 @@ export class PostCreateComponent {
     return false
   }
 
+  /**
+   * constructor
+   * @param fb formGroup builder service
+   * @param postsService post manipulation service
+   */
   constructor(private fb: FormBuilder, private postsService: PostsService) {}
 
+  /**
+   * add new post
+   */
   onAddPost() {
     if (this.postForm.invalid) return
 

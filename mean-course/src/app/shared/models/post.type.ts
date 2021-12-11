@@ -1,5 +1,5 @@
 export type Post = {
-  id: string | undefined
+  id: string
   title: string
   content: string
 }
