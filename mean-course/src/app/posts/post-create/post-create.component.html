@@ -10,9 +10,16 @@
           matInput
           type="text"
           formControlName="title">
-        <mat-error *ngIf="titleRequiredError">Please enter a post title</mat-error>
-        <mat-error *ngIf="titleMinLengthError">title length should be at least 3</mat-error>
+        <mat-error *ngIf="titleErrorMessage">{{ titleErrorMessage }}</mat-error>
       </mat-form-field>
+      <div>
+        <button mat-stroked-button type="button" (click)="filePicker.click()">Pick Image</button>
+        <input type="file" #filePicker (change)="onImagePicked($event)">
+        <mat-error *ngIf="imageErrorMessage">{{ imageErrorMessage }}</mat-error>
+      </div>
+      <div class="image-preview" *ngIf="postForm.controls['image'].valid && previewImage">
+        <img [src]="previewImage" [alt]="postForm.controls['title'].value">
+      </div>
       <mat-form-field>
         <mat-label>Post Content</mat-label>
         <textarea
@@ -30,4 +37,15 @@
       </button>
     </form>
   </mat-card>
+
+  <pre>
+    touched: {{ postForm.controls['image'].touched }}
+    dirty: {{ postForm.controls['image'].dirty }}
+    pending: {{ postForm.controls['image'].pending }}
+    pristine: {{ postForm.controls['image'].pristine }}
+    status: {{ postForm.controls['image'].status }}
+    untouched: {{ postForm.controls['image'].untouched }}
+    valid: {{ postForm.controls['image'].valid }}
+    invalid: {{ postForm.controls['image'].invalid }}
+  </pre>
 </ng-template>
